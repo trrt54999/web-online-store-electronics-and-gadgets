@@ -1,132 +1,355 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+Розроблення REST-ендпоінтів засобами NestJS  
+**Варіант:** №1 (Категорія: «Електроніка та гаджети», префікс маршруту: `/gadgets`)  
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+---
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Мета
+- Опанувати архітектурні засади фреймворку NestJS: модульну організацію, інверсію керування (IoC) та ін’єкцію залежностей (Dependency Injection).
+- Навчитися створювати та конфігурувати проєкт за допомогою `@nestjs/cli`, дослідити призначення вхідної точки застосунку `main.ts` та кореневого модуля `AppModule`.
+- Опанувати розробку REST-контролерів із маршрутизацією через декоратори методів (`@Get`, `@Post`, `@Patch`, `@Delete`).
+- Навчитися витягувати дані з HTTP-запитів за допомогою декораторів параметрів (`@Param`, `@Query`, `@Body`, `@Headers`) та формувати типізовані контракти DTO (Data Transfer Objects).
+- Реалізувати інкапсуляцію бізнес-логіки в сервісному провайдері з in-memory сховищем та налаштувати коректні HTTP-статуси й виключення (`NotFoundException`).
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 2. Електроніка та гаджети
+* **Категорія:** Електроніка та гаджети
+* **Базовий префікс маршруту:** `/gadgets`
+* **Поля сутності (CreateDto):**
+  * `title`: string (назва гаджета)
+  * `price`: number (ціна)
+  * `warrantyMonths`: number (гарантія в місяцях)
+  * `cpu`: string (процесор)
+  * `ramGb`: number (обсяг оперативної пам'яті в ГБ)
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 3. Структура проєкту
+
+```text
+online-store-electronics-and-gadgets/
+├── src/
+│   ├── gadgets/
+│   │   ├── dto/
+│   │   │   ├── create-gadgets.dto.ts
+│   │   │   └── update-gadgets.dto.ts
+│   │   ├── entity/
+│   │   │   └── gadgets.entity.ts
+│   │   ├── gadgets.controller.ts
+│   │   ├── gadgets.module.ts
+│   │   └── gadgets.service.ts
+.....................................
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## 4. Хід роботи
 
-# watch mode
-$ npm run start:dev
+### Ініціалізація та оголошення контрактів DTO
 
-# production mode
-$ npm run start:prod
+1. **Створення проєкту:**
+   Проєкт ініціалізовано за допомогою NestJS CLI:
+   ```bash
+   npx @nestjs/cli new online-store-electronics-and-gadgets --strict --package-manager npm
+   ```
+
+2. **Генерація модуля та контролера:**
+   ```bash
+   npx @nestjs/cli g module gadgets
+   npx @nestjs/cli g co gadgets --no-spec
+   npx @nestjs/cli g s gadgets --no-spec
+   ```
+
+3. **Створення DTO та Entity:**
+
+`src/gadgets/entity/gadgets.entity.ts`
+```typescript
+export class GadgetsEntity {
+  id: string;
+  title: string;
+  price: number;
+  warrantyMonths: number;
+  cpu: string;
+  ramGb: number;
+}
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+`src/gadgets/dto/create-gadgets.dto.ts`
+```typescript
+export class CreateGadgetsDto {
+  readonly title: string;
+  readonly price: number;
+  readonly warrantyMonths: number;
+  readonly cpu: string;
+  readonly ramGb: number;
+}
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+`src/gadgets/dto/update-gadgets.dto.ts`
+```typescript
+export class UpdateGadgetsDto {
+  readonly title?: string;
+  readonly price?: number;
+  readonly warrantyMonths?: number;
+  readonly cpu?: string;
+  readonly ramGb?: number;
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Observability
+### Рівень 2 та 3. Повний REST CRUD, In-Memory Service, Query-фільтрація та Headers
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+#### Сервіс (`src/gadgets/gadgets.service.ts`)
+Реалізує in-memory сховище з початковими даними, методи CRUD, обробку помилок (`NotFoundException`), регістронезалежний пошук та обмеження кількості результатів (`slice`).
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+```typescript
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { GadgetsEntity } from './entity/gadgets.entity.js';
+import { CreateGadgetsDto } from './dto/create-gadgets.dto.js';
+import { randomUUID } from 'crypto';
+import { UpdateGadgetsDto } from './dto/update-gadgets.dto.js';
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+@Injectable()
+export class GadgetsService {
+  private items: GadgetsEntity[] = [
+    {
+      id: '1',
+      title: 'PC',
+      price: 30000,
+      warrantyMonths: 6,
+      cpu: 'Ryzen 9 5900 X',
+      ramGb: 32,
+    },
+    {
+      id: '2',
+      title: 'Phone',
+      price: 5000,
+      warrantyMonths: 12,
+      cpu: 'Snapdragon 8 Elite Gen 6',
+      ramGb: 8,
+    },
+    {
+      id: '3',
+      title: 'Tablet',
+      price: 15000,
+      warrantyMonths: 24,
+      cpu: 'Snapdragon X Elite',
+      ramGb: 16,
+    },
+  ];
 
-To add it to this project, run this and approve the code it prints at [observe.nestjs.com/link](https://observe.nestjs.com/link) - signing up for free if you have no account:
+  findAll(search?: string, limit?: number) {
+    let items = this.items;
 
-```bash
-$ npx @nestjs/observe link
+    if (search) {
+      items = this.items.filter((item) =>
+        item.title.toLowerCase().includes(search.toLowerCase()),
+      );
+    }
+
+    if (limit) {
+      items = items.slice(0, limit);
+    }
+
+    return items;
+  }
+
+  findOne(id: string) {
+    const item = this.items.find((item) => item.id === id);
+
+    if (!item || id === '0') {
+      throw new NotFoundException(`Entity with ID: ${id} not found!`);
+    }
+
+    return item;
+  }
+
+  create(dto: CreateGadgetsDto) {
+    const newGadget = {
+      id: randomUUID(),
+      ...dto,
+    };
+
+    this.items.push(newGadget);
+
+    return newGadget;
+  }
+
+  update(id: string, dto: UpdateGadgetsDto) {
+    const gadgetToUpdate = this.findOne(id);
+    const index = this.items.indexOf(gadgetToUpdate);
+
+    const updatedGadget = {
+      ...gadgetToUpdate,
+      ...dto,
+    };
+
+    this.items[index] = updatedGadget;
+
+    return updatedGadget;
+  }
+
+  remove(id: string) {
+    const gadgetToDelete = this.findOne(id);
+    const index = this.items.indexOf(gadgetToDelete);
+
+    this.items.splice(index, 1);
+  }
+}
 ```
 
-It installs `@nestjs/observe`, wires it into `AppModule` and `main.ts`, and writes the app key and secret into `.env`, which every `nest start` script (`start`, `start:dev`, `start:debug`) then loads. In production, set `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment instead.
+#### Контролер (`src/gadgets/gadgets.controller.ts`)
+Приймає запити, використовує декоратори параметрів (`@Query`, `@Param`, `@Body`), налаштовує HTTP-статуси (`@HttpCode`) та додає кастомні заголовки відповіді (`@Header`).
 
-Or do it by hand:
+```typescript
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Query,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Injectable,
+  Delete,
+  Header,
+} from '@nestjs/common';
+import { CreateGadgetsDto } from './dto/create-gadgets.dto.js';
+import { GadgetsService } from './gadgets.service.js';
 
-```bash
-$ npm install @nestjs/observe
+@Injectable()
+@Controller('gadgets')
+export class GadgetsController {
+  constructor(private readonly gadgetsService: GadgetsService) {}
+
+  @Get()
+  @Header('X-API-Version', '1.0')
+  @Header('X-Service-Status', 'operational')
+  findAll(@Query('search') search?: string, @Query('limit') limit?: number) {
+    return this.gadgetsService.findAll(search, limit);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.gadgetsService.findOne(id);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  createGadgetDto(@Body() gadget: CreateGadgetsDto) {
+    return this.gadgetsService.create(gadget);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  delete(@Param('id') id: string) {
+    this.gadgetsService.remove(id);
+  }
+}
 ```
 
-Then follow the [setup guide](https://docs.nestjs.com/observability/sdk) - it takes a single import and an app key.
+#### Точка входу (`src/main.ts`)
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module.js';
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(process.env.PORT ?? 3000);
+}
+bootstrap();
+```
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## 5. Демонстрація тестування API (Postman / HTTP Client)
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Нижче наведено результати тестування розроблених ендпоінтів.
 
-## Support
+### 1. Отримання всіх записів та перевірка заголовків
+* **Request:** `GET http://localhost:3000/gadgets`
+* **Очікуваний результат:** Статус `200 OK`, масив елементів та наявність заголовків `X-API-Version: 1.0`, `X-Service-Status: operational`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+<img width="1273" height="802" alt="image" src="https://github.com/user-attachments/assets/c5bd31cd-12f9-4772-9956-0fb5d40ba31d" />
+<img width="1265" height="796" alt="image" src="https://github.com/user-attachments/assets/abc2fc36-f5cc-4551-b5e1-319aeb1fd765" />
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+### 2. Пошук та фільтрація (Query Params)
+* **Request:** `GET http://localhost:3000/gadgets?search=phone`
+* **Очікуваний результат:** Повертає тільки об'єкт "Phone", незалежно від регістру.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+<img width="1261" height="795" alt="image" src="https://github.com/user-attachments/assets/9799bc6b-0c17-4bb9-90f8-0c6a24bfa391" />
+
+
+---
+
+### 3. Обмеження кількості записів (Limit)
+* **Request:** `GET http://localhost:3000/gadgets?limit=1`
+* **Очікуваний результат:** Повертається лише перша сутність із масиву.
+
+<img width="1271" height="802" alt="image" src="https://github.com/user-attachments/assets/e950d618-3807-44b4-b87b-75b258ec8cc9" />
+
+
+---
+
+### 4. Отримання запису за ID
+* **Request:** `GET http://localhost:3000/gadgets/3`
+* **Очікуваний результат:** Статус `200 OK` та об'єкт гаджет з ID "3".
+
+<img width="1269" height="782" alt="image" src="https://github.com/user-attachments/assets/a5357cfe-cd81-4bce-a995-4400c2e8e0bb" />
+
+
+---
+
+### 5. Обробка помилки 404 (Not Found)
+* **Request:** `GET http://localhost:3000/gadgets/99999`
+* **Очікуваний результат:** Статус `404 Not Found`, JSON з повідомленням про помилку.
+
+<img width="1270" height="794" alt="image" src="https://github.com/user-attachments/assets/e5f9536f-9a47-4549-8643-0ccbcf03ed43" />
+
+
+---
+
+### 6. Створення нового запису (POST)
+* **Request:** `POST http://localhost:3000/gadgets`
+* **Headers:** `Content-Type: application/json`
+* **Body:**
+```json
+{
+  "title": "Smart Watch",
+  "price": 3000,
+  "warrantyMonths": 12,
+  "cpu": "Apple S9",
+  "ramGb": 2
+}
+```
+* **Очікуваний результат:** Статус `201 Created` та новий об'єкт із згенерованим `id` (UUID).
+
+<img width="1270" height="790" alt="image" src="https://github.com/user-attachments/assets/e20fa7db-83c0-427c-aefb-4ad42c2f83a1" />
+
+
+---
+
+### 7. Видалення запису (DELETE)
+* **Request:** `DELETE http://localhost:3000/gadgets/1`
+* **Очікуваний результат:** Статус `204 No Content` без тіла відповіді.
+
+<img width="1269" height="791" alt="image" src="https://github.com/user-attachments/assets/7f570608-35c4-4c59-abef-dfd4eb5c4214" />
+
+
+---
+
+## 6. Висновки
+Під час виконання практичної роботи було опановано базові та просунуті концепції TypeScript-фреймворку NestJS. Було розроблено RESTful API для ресурсу «Електроніка та гаджети» (/gadgets). 
+
+Зокрема:
+1. Організовано чітку модульну структуру із розділенням відповідей між контролером та сервісом за принципами IoC/DI.
+2. Створено типізовані контракти DTO та сутності Entity.
+3. Реалізовано повний CRUD-цикл операцій із підтримкою вбудованого in-memory сховища.
+4. Налаштовано коректні HTTP-статуси відповіді (`201 Created`, `204 No Content`, `404 Not Found`) та кастомні response-заголовки (`@Header`).
+5. Реалізовано регістронезалежний пошук та обмеження вибірки за допомогою Query-параметрів.
+6. Проведено комплексне тестування розроблених ендпоінтів у Postman.
