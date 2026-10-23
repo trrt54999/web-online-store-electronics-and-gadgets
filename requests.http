@@ -1,0 +1,19 @@
+GET http://localhost:3000/gadgets
+
+GET http://localhost:3000/gadgets?search=phone
+
+GET http://localhost:3000/gadgets/1
+
+GET http://localhost:3000/gadgets/99999
+
+POST http://localhost:3000/gadgets
+Content-Type: application/json
+{
+  "title": "Smart Watch",
+  "price": 3000,
+  "warrantyMonths": 12,
+  "cpu": "Apple S9",
+  "ramGb": 2
+}
+
+DELETE http://localhost:3000/gadgets/1
